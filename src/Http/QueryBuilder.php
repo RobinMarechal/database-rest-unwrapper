@@ -1,8 +1,12 @@
 <?php
 
 namespace RobinMarechal\DatabaseRestUnwrapper\Http;
+
 use Carbon\Carbon;
+use function explode;
+use Illuminate\Support\Facades\DB;
 use \Illuminate\Support\Facades\Request;
+use function strpos;
 
 /**
  * Created by PhpStorm.
@@ -33,7 +37,7 @@ class QueryBuilder
 	}
 
 
-	public static function buildQuery(&$query, $class)
+	public static function buildQuery (&$query, $class)
 	{
 		$instance = new QueryBuilder($query, $class);
 		$instance->build();
@@ -47,14 +51,25 @@ class QueryBuilder
 		$this->applyUrlParams();
 	}
 
+
 	// ?....&limit=..&offset=...
 	public function applyLimitingParameters ()
 	{
-		if ($this->has("limit")) {
-			$this->query->take($this->request->get("limit"));
+		if ($this->request->filled("limit")) {
+			$limit = $this->request->get("limit");
+
+			if(strpos($limit, ','))
+			{
+				$arr = explode(',', $limit);
+				$this->query->take($arr[0]);
+				$this->query->skip($arr[1]);
+				return;
+			}
+
+			$this->query->take($limit);
 		}
 
-		if ($this->has("offset")) {
+		if ($this->request->filled("offset")) {
 			$this->query->skip($this->request->get("offset"));
 		}
 	}
@@ -63,14 +78,17 @@ class QueryBuilder
 	// ?....&orderby=..&order=...
 	public function applyOrderingParameters ()
 	{
-		if ($this->has("orderby")) {
-			$orderBy = $this->getRawArrayFromString($this->request->get('orderby'))[0];
-			if ($this->has("order")) {
-				$this->query->orderBy($orderBy, $this->request->get("order"));
+		if ($this->request->filled("orderby")) {
+			$orderBy = $this->request->get('orderby');
+			$order = $this->request->get('order') ?: 'ASC';
+
+			if (strpos($orderBy, ',') != -1) {
+				$arr = explode(',', $orderBy);
+				$orderBy = $arr[0];
+				$order = $arr[1];
 			}
-			else {
-				$this->query->orderBy($orderBy);
-			}
+
+			$this->query->orderBy($orderBy, $order);
 		}
 	}
 
@@ -82,16 +100,16 @@ class QueryBuilder
 		$temporalField = (new $modelClassName())->temporalField;
 
 		if (isset($temporalField) && $temporalField != null) {
-			$from = $this->has("from") ? Carbon::parse($this->request->get("from")) : null;
-			$to = $this->has("to") ? Carbon::parse($this->request->get("to")) : null;
+			$from = $this->request->filled("from") ? Carbon::parse($this->request->get("from")) : null;
+			$to = $this->request->filled("to") ? Carbon::parse($this->request->get("to")) : null;
 
 			if (isset($from) && isset($to)) {
 				$this->query->whereBetween($temporalField, [$from, $to]);
 			}
-			else if ($this->has("from")) {
+			else if ($this->request->filled("from")) {
 				$this->query->where($temporalField, '>=', $from);
 			}
-			else if ($this->has("to")) {
+			else if ($this->request->filled("to")) {
 				$this->query->where($temporalField, '<=', $to);
 			}
 		}
@@ -101,7 +119,7 @@ class QueryBuilder
 	// ?....&with=rel1,rel2,rel3.rel3rel...
 	public function applyRelationsParameters ()
 	{
-		if ($this->has("with")) {
+		if ($this->request->filled("with")) {
 			$with = $this->request->get("with");
 			if ($with == "all" || $with == '*') {
 				$this->query->withAll();
@@ -116,7 +134,7 @@ class QueryBuilder
 
 	public function applyFieldSelectingParameters ()
 	{
-		if ($this->has('select')) {
+		if ($this->request->filled('select')) {
 			$fields = $this->request->get('select');
 			$arr = $this->getRawArrayFromString($fields);
 			$this->query->select($arr);
@@ -126,7 +144,7 @@ class QueryBuilder
 
 	public function applyWhereParameter ()
 	{
-		if ($this->has('where')) {
+		if ($this->request->filled('where')) {
 			$wheres = explode(';', $this->request->get('where'));
 			foreach ($wheres as $where) {
 				$this->query->whereRaw($where);
@@ -138,6 +156,10 @@ class QueryBuilder
 	protected function getRawArrayFromString ($str)
 	{
 		$sep = '+';
+		$str = preg_replace('/\( \s+/', '', $str);
+		$str = preg_replace('/\s+ \)/', '', $str);
+		$str = preg_replace('/,\s+/', ',', $str);
+		$str = preg_replace('/\s+,/', ',', $str);
 		$str = preg_replace('/,\s+,/', ',', $str);
 		$len = strlen($str);
 		$p = 0;
@@ -165,13 +187,26 @@ class QueryBuilder
 		$arr = explode($sep, $str);
 
 		for ($i = 0; $i < count($arr); $i++) {
-			$v = $arr[ $i ];
-			if (preg_match('/[a-z\d_]+\([a-z\d_]+(,(([a-z\d_]+)|("\s*")))*\)/i', $v)) {
-				$arr[ $i ] = DB::raw($v);
+			if (strpos($arr[ $i ], '=')) {
+				$tmp = explode('=', $arr[ $i ]);
+				$f = $tmp[1];
+				$as = $tmp[0];
+				$arr[ $i ] = "$f AS $as";
+			}
+			if (preg_match('/[a-z\d_]+\(((\*|\w+)|[a-z\d_]+(,(([a-z\d_]+)|("\s*")))*)\)(\s*as\s+\w+)?/i', $arr[ $i ])) {
+				$arr[ $i ] = DB::raw($arr[ $i ]);
 			}
 		}
 
 		return $arr;
+	}
+
+
+	public function applyDistinct ()
+	{
+		if ($this->request->filled('distinct') && $this->request->get('distinct') == true) {
+			$this->query->distinct();
+		}
 	}
 
 
@@ -183,5 +218,11 @@ class QueryBuilder
 		$this->applyTemporalParameters();
 		$this->applyFieldSelectingParameters();
 		$this->applyWhereParameter();
+		$this->applyDistinct();
+	}
+
+	protected function getBuiltQuery()
+	{
+		return $this->query;
 	}
 }

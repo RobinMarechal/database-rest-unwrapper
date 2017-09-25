@@ -1,12 +1,12 @@
 {
-    "name": "robinmarechal/rest-api-unwrapper",
+    "name": "robinmarechal/database-rest-unwrapper",
     "type": "library",
     "description": ":package_description",
     "keywords": [
         "RobinMarechal",
-        "RestApiUnwrapper"
+        "DatabaseRestUnwrapper"
     ],
-    "homepage": "https://github.com/RobinMarechal/RestApiUnwrapper",
+    "homepage": "https://github.com/RobinMarechal/database-rest-unwrapper",
     "license": "MIT",
     "authors": [
         {
@@ -29,12 +29,12 @@
     },
     "autoload": {
         "psr-4": {
-            "RobinMarechal\\RestApiUnwrapper\\": "src"
+            "RobinMarechal\\DatabaseRestUnwrapper\\": "packages/robinmarechal/database-rest-unwrapper/src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "RobinMarechal\\RestApiUnwrapper\\": "tests"
+            "RobinMarechal\\DatabaseRestUnwrapper\\": "packages/robinmarechal/database-rest-unwrapper/src"
         }
     },
     "scripts": {

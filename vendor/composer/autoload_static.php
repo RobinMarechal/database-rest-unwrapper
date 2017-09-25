@@ -9,14 +9,14 @@ class ComposerStaticInit454b16f46a37e3ee170b8f346311ff62
     public static $prefixLengthsPsr4 = array (
         'R' => 
         array (
-            'RobinMarechal\\RestApiUnwrapper\\' => 31,
+            'RobinMarechal\\DatabaseRestUnwrapper\\' => 36,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'RobinMarechal\\RestApiUnwrapper\\' => 
+        'RobinMarechal\\DatabaseRestUnwrapper\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/src',
+            0 => __DIR__ . '/../..' . '/packages/robinmarechal/database-rest-unwrapper',
             1 => __DIR__ . '/../..' . '/tests',
         ),
     );

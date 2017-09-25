@@ -6,5 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'RobinMarechal\\RestApiUnwrapper\\' => array($baseDir . '/src', $baseDir . '/tests'),
+    'RobinMarechal\\DatabaseRestUnwrapper\\' => array($baseDir . '/packages/robinmarechal/database-rest-unwrapper', $baseDir . '/tests'),
 );
