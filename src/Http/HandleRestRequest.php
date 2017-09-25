@@ -23,11 +23,21 @@ trait HandleRestRequest
 	protected $postValues;
 
 
-	function __construct ($request)
+//	function __construct ($request)
+//	{
+//		$this->traitRequest = $request;
+//		$this->postValues = $request->json()
+//									->all();
+//	}
+
+	public function setTraitRequest($request)
 	{
 		$this->traitRequest = $request;
-		$this->postValues = $request->json()
-									->all();
+	}
+
+	public function getTraitRequest()
+	{
+		return $this->traitRequest;
 	}
 
 

@@ -12,6 +12,7 @@ use function camel_case;
 use function class_exists;
 use ErrorException;
 use Exception;
+use Illuminate\Http\Request;
 use function strtoupper;
 use function substr;
 use Symfony\Component\Debug\Exception\ClassNotFoundException;
@@ -21,12 +22,15 @@ use App\Http\Controllers\Controller;
 class RestController extends Controller
 {
 
+	function __construct (Request $request)
+	{
+		$this->setTraitRequest($request);
+	}
+
+
 	public function dispatch ($resource, $id = null, $relation = null, $relatedId = null)
 	{
-		if ($this->traitRequest->path() == 'api/auth/user') {
-			return $this->user();
-		}
-
+		$request = $this->getTraitRequest();
 		try {
 
 			$controllerClassName = "App\\Http\\Controllers\\" . strtoupper($resource[0]) . camel_case(substr($resource, 1)) . "Controller";
@@ -36,13 +40,13 @@ class RestController extends Controller
 			}
 
 
-			$controller = new $controllerClassName($this->traitRequest);
+			$controller = new $controllerClassName($request);
 
 			if (!isset($id)) {
-				if ($this->traitRequest->isMethod("get")) {
+				if ($request->isMethod("get")) {
 					return $controller->all();
 				}
-				else if ($this->traitRequest->isMethod("post")) {
+				else if ($request->isMethod("post")) {
 					return $controller->post();
 				}
 				else {
@@ -52,13 +56,13 @@ class RestController extends Controller
 
 			if (!isset($relation)) // findById
 			{
-				if ($this->traitRequest->isMethod("get")) {
+				if ($request->isMethod("get")) {
 					return $controller->getById($id);
 				}
-				else if ($this->traitRequest->isMethod("put")) {
+				else if ($request->isMethod("put")) {
 					return $controller->put($id);
 				}
-				else if ($this->traitRequest->isMethod("delete")) {
+				else if ($request->isMethod("delete")) {
 					return $controller->delete($id);
 				}
 				else {
@@ -85,6 +89,6 @@ class RestController extends Controller
 		}
 
 		EXCEPTION:
-		throw new Exception("The requested action is invalid. (" . $this->traitRequest->url() . " with method " . $this->traitRequest->method() . ")");
+		throw new Exception("The requested action is invalid. (" . $request->url() . " with method " . $request->method() . ")");
 	}
 }
