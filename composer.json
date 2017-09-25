@@ -29,12 +29,12 @@
     },
     "autoload": {
         "psr-4": {
-            "RobinMarechal\\DatabaseRestUnwrapper\\": "packages/robinmarechal/database-rest-unwrapper/src"
+            "RobinMarechal\\DatabaseRestUnwrapper\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "RobinMarechal\\DatabaseRestUnwrapper\\": "packages/robinmarechal/database-rest-unwrapper/src"
+            "RobinMarechal\\DatabaseRestUnwrapper\\": "tests/"
         }
     },
     "scripts": {
