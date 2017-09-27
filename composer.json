@@ -1,7 +1,7 @@
 {
     "name": "robinmarechal/database-rest-unwrapper",
     "type": "library",
-    "description": ":package_description",
+    "description": "A simple way to unwrap your database as a RESTful API.",
     "keywords": [
         "RobinMarechal",
         "DatabaseRestUnwrapper"
