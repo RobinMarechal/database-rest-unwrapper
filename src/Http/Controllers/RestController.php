@@ -22,15 +22,18 @@ use App\Http\Controllers\Controller;
 class RestController extends Controller
 {
 
+	protected $request;
+
 	function __construct (Request $request)
 	{
-		$this->setTraitRequest($request);
+		$this->request = $request;
 	}
 
 
 	public function dispatch ($resource, $id = null, $relation = null, $relatedId = null)
 	{
-		$request = $this->getTraitRequest();
+		$request = $this->request;
+
 		try {
 
 			$controllerClassName = "App\\Http\\Controllers\\" . strtoupper($resource[0]) . camel_case(substr($resource, 1)) . "Controller";
@@ -40,7 +43,8 @@ class RestController extends Controller
 			}
 
 
-			$controller = new $controllerClassName($request);
+			$controller = new $controllerClassName();
+			$controller->setTraitRequest($request);
 
 			if (!isset($id)) {
 				if ($request->isMethod("get")) {

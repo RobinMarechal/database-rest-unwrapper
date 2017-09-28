@@ -33,6 +33,7 @@ trait HandleRestRequest
 	public function setTraitRequest($request)
 	{
 		$this->traitRequest = $request;
+		$this->postValues = $request->json()->all();
 	}
 
 	public function getTraitRequest()
@@ -75,8 +76,8 @@ trait HandleRestRequest
 
 		$data->update($this->traitRequest->all());
 
-		if ($this->traitRequest->userWantsAll()) {
-			$data = $this->all();
+		if ($this->userWantsAll()) {
+			$data = $this->all()->getData();
 		}
 
 		return new ResponseData($data, Response::HTTP_OK);
@@ -93,8 +94,8 @@ trait HandleRestRequest
 
 		$data->delete();
 
-		if ($this->traitRequest->userWantsAll()) {
-			$data = $this->all();
+		if ($this->userWantsAll()) {
+			$data = $this->all()->getData();
 		}
 
 		return new ResponseData($data, Response::HTTP_OK);
@@ -105,8 +106,8 @@ trait HandleRestRequest
 	{
 		$data = $class::create($this->postValues);
 
-		if ($this->traitRequest->userWantsAll()) {
-			$data = $this->all();
+		if ($this->userWantsAll()) {
+			$data = $this->all()->getData();
 		}
 
 		return new ResponseData($data, Response::HTTP_CREATED);
@@ -254,6 +255,11 @@ trait HandleRestRequest
 	//
 	//        return $resp->getData();
 	//    }
+
+	protected function userWantsAll()
+	{
+		return $this->traitRequest->filled('all') && $this->traitRequest->get('all') == true;
+	}
 
 
 	public function __call ($method, $parameters)
