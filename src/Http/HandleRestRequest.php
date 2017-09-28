@@ -104,7 +104,6 @@ trait HandleRestRequest
 	public function defaultPost ($class)
 	{
 		$data = $class::create($this->postValues);
-		$data;
 
 		if ($this->traitRequest->userWantsAll()) {
 			$data = $this->all();

@@ -34,4 +34,4 @@ In a fresh Laravel installation, the Controller class should be located at `app/
 
 #### **Here you go!**
 
-[See the doc](http://github.com/RobinMarechal/database-rest-unwrapper/documentation.md "See the doc")
+[See the doc](http://github.com/RobinMarechal/database-rest-unwrapper/blob/master/documentation.md "See the doc")

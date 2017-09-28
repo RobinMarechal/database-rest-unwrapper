@@ -125,7 +125,7 @@ class QueryBuilder
 				$this->query->withAll();
 			}
 			else {
-				$withArr = explode(",", $this->request->get('with'));
+				$withArr = explode(";", $this->request->get('with'));
 				$this->query->with($withArr);
 			}
 		}
@@ -162,24 +162,24 @@ class QueryBuilder
 		$str = preg_replace('/\s+,/', ',', $str);
 		$str = preg_replace('/,\s+,/', ',', $str);
 		$len = strlen($str);
-		$p = 0;
+		$quotes = 0;
 
 		for ($i = 0; $i < $len; $i++) {
 			$c = $str[ $i ];
 
-			if ($c == ',' && $p == 0) {
+			if ($c == ';' && $quotes == 0) {
 				$str[ $i ] = $sep;
 				continue;
 			}
-			else if ($c == '(') {
-				$p++;
+			else if ($c == '"' && $c == 0) {
+				$quotes++;
 				continue;
 			}
-			else if ($c == ')') {
-				$p--;
+			else if ($c == '"' && $c > 0) {
+				$quotes--;
 			}
 
-			if ($p < 0) {
+			if ($quotes < 0) {
 				throw Exception("Error in URL query parameter");
 			}
 		}
@@ -193,7 +193,7 @@ class QueryBuilder
 				$as = $tmp[0];
 				$arr[ $i ] = "$f AS $as";
 			}
-			if (preg_match('/[a-z\d_]+\(((\*|\w+)|[a-z\d_]+(,(([a-z\d_]+)|("\s*")))*)\)(\s*as\s+\w+)?/i', $arr[ $i ])) {
+			if (preg_match('/[a-z\d_]+\(((\*|\w+)|[a-z\d_]+(,(([a-z\d_]+)|(".*")))*)\)(\s*as\s+\w+)?/i', $arr[ $i ])) {
 				$arr[ $i ] = DB::raw($arr[ $i ]);
 			}
 		}
