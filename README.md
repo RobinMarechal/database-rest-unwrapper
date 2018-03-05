@@ -1,5 +1,7 @@
 # Database Rest Unwrapper
 
+> This project is deprecated and no longer maintained!
+
 A simple way to unwrap your database as a RESTful API.
 Only tested with Laravel 5.5 and MySQL. 
 
